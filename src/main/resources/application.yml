@@ -1,0 +1,9 @@
+server:
+  port: 9091
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/task-tracker
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
