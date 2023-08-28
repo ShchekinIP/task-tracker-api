@@ -1,6 +1,7 @@
 package org.example.task.tracker.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.task.tracker.controller.helper.ControllerHelper;
 import org.example.task.tracker.repository.ProjectRepository;
 import org.example.task.tracker.dto.ProjectDto;
 import org.example.task.tracker.dto.ResponseDto;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class ProjectController {
     private final ProjectDtoFactory projectDtoFactory;
     private final ProjectRepository projectRepository;
+    private final ControllerHelper controllerHelper;
 
     @PutMapping("")
     public ProjectDto createOrUpdateProject(
@@ -35,7 +37,7 @@ public class ProjectController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name can't be empty");
         }
 
-        Project project = id.map(this::getProject)
+        Project project = id.map(controllerHelper::getProject)
                 .orElseGet(() -> Project.builder().build());
 
         name.ifPresent(projectName -> {
@@ -70,7 +72,7 @@ public class ProjectController {
 
     @PatchMapping("/editProject/{id}")
     public ProjectDto editProject(@RequestParam String name, @PathVariable("id") Long id) {
-        Project project = getProject(id);
+        Project project = controllerHelper.getProject(id);
         projectRepository.findByName(name)
                 .filter(x -> Objects.equals(x.getId(), id))
                 .ifPresent(x -> {
@@ -94,14 +96,9 @@ public class ProjectController {
 
     @DeleteMapping("/deleteProject/{id}")
     public ResponseDto deleteProject(@PathVariable("id") Long id) {
-        getProject(id);
+        controllerHelper.getProject(id);
         projectRepository.deleteById(id);
         return ResponseDto.makeDefault(true);
-    }
-
-    private Project getProject(Long id) {
-        return projectRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Project with id [%d] not found", id)));
     }
 
     private String getProjectAlreadyExistMessage(String projectName) {

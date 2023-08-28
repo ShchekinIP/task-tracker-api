@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Entity
@@ -18,14 +19,28 @@ public class TaskState {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true)
+    @OneToOne
+    private TaskState leftTaskState;
+
+    @OneToOne
+    private TaskState rightTaskState;
+
     private String name;
 
-    private long ordinal;
-
     private Instant createdAt = Instant.now();
+
+    @ManyToOne
+    private Project project;
 
     @OneToMany
     @JoinColumn(name = "task_state_id")
     private List<Task> tasks = new ArrayList<>();
+
+    public Optional<TaskState> getLeftTaskState() {
+        return Optional.ofNullable(leftTaskState);
+    }
+
+    public Optional<TaskState> getRightTaskState() {
+        return Optional.ofNullable(rightTaskState);
+    }
 }
